@@ -6,10 +6,12 @@ services:
       - MEDIAWIKI_DB_TYPE=mysql
       - MEDIAWIKI_DB_HOST=mariadb
       - MEDIAWIKI_DB_NAME=mediawiki
-      - MEDIAWIKI_DB_USER=wikiuser
-      - MEDIAWIKI_DB_PASSWORD=secretpassword
+      - MEDIAWIKI_DB_USER=mediawiki
+      - MEDIAWIKI_DB_PASSWORD=${MARIADB_PASSWORD}
     volumes:
       - mediawiki_data:/var/www/html
+      - ./LocalSettings.php:/var/www/html/LocalSettings.php
+      # php maintenance/run.php update
   nginx:
     image: nginx:alpine
     restart: always
@@ -25,10 +27,10 @@ services:
     environment:
       # ALLOW_EMPTY_PASSWORD is recommended only for development.
       #- ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_USER=wikiuser
-      - MYSQL_PASSWORD=secretpassword
+      - MYSQL_USER=mediawiki
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD}
       - MYSQL_DATABASE=mediawiki
-      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
       - MYSQL_CHARACTER_SET=utf8mb4
       - MYSQL_COLLATE=utf8mb4_unicode_ci
     volumes:
@@ -41,7 +43,12 @@ services:
       - PMA_HOST=mariadb
       - PMA_PORT=3306
       - PMA_USER=root
-      - PMA_PASSWORD=rootpassword
+      - PMA_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      # PHP Configuration overrides
+      - PHP_MEMORY_LIMIT=512M # Sets memory_limit to 512 Megabytes
+      - PHP_MAX_EXECUTION_TIME=300 # Sets max_execution_time to 300 seconds
+      - PHP_UPLOAD_MAX_FILESIZE=50M # Sets upload_max_filesize to 50 Megabytes
+      - PHP_POST_MAX_SIZE=50M # Sets post_max_size to 50 Megabytes (should match or be slightly larger than upload_max_filesize)
     depends_on:
       - mariadb
 volumes:
