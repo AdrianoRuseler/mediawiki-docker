@@ -4,7 +4,7 @@ services:
     restart: always
     environment:
       - MEDIAWIKI_DB_TYPE=mysql
-      - MEDIAWIKI_DB_HOST=db
+      - MEDIAWIKI_DB_HOST=mariadb
       - MEDIAWIKI_DB_NAME=mediawiki
       - MEDIAWIKI_DB_USER=wikiuser
       - MEDIAWIKI_DB_PASSWORD=secretpassword
@@ -47,3 +47,4 @@ services:
 volumes:
   mediawiki_data:
   mariadb_data:
+
