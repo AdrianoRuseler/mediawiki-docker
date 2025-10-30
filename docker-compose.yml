@@ -1,0 +1,50 @@
+services:
+  mediawiki:
+    image: mediawiki:stable-fpm-alpine
+    restart: always
+    environment:
+      - MEDIAWIKI_DB_TYPE=mysql
+      - MEDIAWIKI_DB_HOST=db
+      - MEDIAWIKI_DB_NAME=mediawiki
+      - MEDIAWIKI_DB_USER=wikiuser
+      - MEDIAWIKI_DB_PASSWORD=secretpassword
+    volumes:
+      - mediawiki_data:/var/www/html
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - mediawiki_data:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - mediawiki
+
+  db:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      - MYSQL_DATABASE=mediawiki
+      - MYSQL_USER=wikiuser
+      - MYSQL_PASSWORD=secretpassword
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=wikiuser
+      - PMA_PASSWORD=secretpassword
+    depends_on:
+      - db
+
+volumes:
+  mediawiki_data:
+  db_data:
